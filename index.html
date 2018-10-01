@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crypto Election</title>
+</head>
+<body>
+
+    <div>
+        
+        Vote for: <b id="candidateName">...</b>
+
+        <hr>
+
+        Update canidate name: <input type="text" id="newCandidateName"> <button type="button" id="updateCandidateName">Update</button>
+
+    </div>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript" src="web3.min.js"></script>
+    <script type="text/javascript">
+        
+        $(document).ready(function()
+        {
+            // Initialise web3
+            if (typeof web3 !== "undefined") {
+              web3 = new Web3(web3.currentProvider);
+            } else {
+              web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
+            }
+
+            // Set account
+            web3.eth.defaultAccount = web3.eth.accounts[0];
+            console.log('web3.eth.defaultAccount', web3.eth.defaultAccount);
+
+            // Set contract abi
+            var contractAbi = [
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "candidateName",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "string"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "_candidateName",
+                            "type": "string"
+                        }
+                    ],
+                    "name": "updateCandidateName",
+                    "outputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "name": "_candidateName",
+                            "type": "string"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "constructor"
+                }
+            ];
+
+            // Set contract address
+            var contractAddress = "0xbee0f20e48e00793148bf7bab5b1e567d33e46d2";
+
+            // Load the contract
+            var contract = web3.eth.contract(contractAbi).at(contractAddress);
+
+            // Display current candidate name
+            contract.candidateName(function(err, candidateName) {
+              if (err) {
+                alert("Error: " + err);
+              } else {
+                $("#candidateName").html(candidateName);
+              }
+            });
+
+            // Handle updating of the candidate name
+            $('#updateCandidateName').click(function() {
+                var newCandidateName = $('#newCandidateName').val();
+                if (newCandidateName.length > 0) {
+                    contract.updateCandidateName(newCandidateName, function(err, result) {
+                        if (!err) {
+                            $("#candidateName").html(newCandidateName);
+                        } else {
+                            alert("Error: " + err);
+                        }
+                    });
+                } else {
+                    alert('You have not set a new name!');
+                }
+            })
+
+        });
+
+    </script>
+
+</body>
+</html>
